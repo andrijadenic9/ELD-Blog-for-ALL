@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: blogcms_postgres
+    environment:
+      POSTGRES_DB: eld_blog_cms
+      POSTGRES_USER: eld_blog_cms_user
+      POSTGRES_PASSWORD: eld_blog_cms_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  strapi:
+    image: node:20-alpine
+    container_name: blogcms_strapi
+    working_dir: /srv/app
+    depends_on:
+      - postgres
+    ports:
+      - "1337:1337"
+    environment:
+      NODE_ENV: development
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: eld_blog_cms
+      DATABASE_USERNAME: eld_blog_cms_user
+      DATABASE_PASSWORD: eld_blog_cms_pass
+      DATABASE_SSL: "false"
+      HOST: 0.0.0.0
+      PORT: 1337
+    volumes:
+      - ./app:/srv/app
+    command: sh -c "npm install && npm run develop"
+
+volumes:
+  postgres_data:
